@@ -10,9 +10,10 @@ const productSchema = new mongoose.Schema({
         type: String, 
         required: [true, "Please Enter Tree's Description"]
     }, 
-    treeGrowerId: {
-        type: String,
-        required: [true, "Please Enter Tree Grower's Id"]
+    treeGrower: {
+        type: mongoose.Schema.ObjectId,
+        ref: "User", 
+        required: true
     },
     price: {
         type: Number, 
@@ -27,7 +28,7 @@ const productSchema = new mongoose.Schema({
         type: String, 
         required: [true, "Please Enter Tree's Location"]
     },
-    rating: {
+    ratings: {
         type: Number,
         default: 0
     }, 
@@ -57,6 +58,11 @@ const productSchema = new mongoose.Schema({
     }, 
     reviews: [
         {
+            user: {
+                type: mongoose.Schema.ObjectId,
+                ref: "User", 
+                required: true
+            },
             name: {
                 type: String, 
                 required: true,
