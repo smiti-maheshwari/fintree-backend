@@ -15,20 +15,26 @@ exports.createTreeProduct = catchAsyncErrors(async(req, res, next) => {
 })
 
 // Get all tree products
-exports.getAllProducts = catchAsyncErrors(async(req, res) => {
-    
-    const resultPerPage = 5;
+exports.getAllProducts = catchAsyncErrors(async(req, res, next) => {
+    const resultPerPage = 8;
     const productCount = await Product.countDocuments();
 
     const apiFeature = new ApiFeatures(Product.find(), req.query)
-    .search().filter().pagination(resultPerPage)
+    .search().filter()
 
-    const products = await apiFeature.query;
+    let products = await apiFeature.query.clone();
+    let filteredProductsCount = products.length;
+    
+    apiFeature.pagination(resultPerPage);
+
+    products = await apiFeature.query.clone();
 
     res.status(200).json({
         success: true, 
         products,
-        productCount
+        productCount, 
+        resultPerPage,
+        filteredProductsCount
     })
 })
 
@@ -115,6 +121,7 @@ exports.createProductReview = catchAsyncErrors(async(req, res, next) => {
 
 // get all reviews of a tree
 exports.getProductReviews = catchAsyncErrors(async(req, res, next) => {
+    console.log(req.query);
     const product = await Product.findById(req.query.id);
     if(!product) {
         return next(new ErrorHandler("Product not found", 404));
@@ -141,7 +148,7 @@ exports.deleteReview = catchAsyncErrors(async(req, res, next) => {
     const ratings = reviews.length === 0 ? 0 : avg / reviews.length;
 
     const numOfReviews = reviews.length;
-    console.log(reviews, ratings)
+    // console.log(reviews, ratings)
     await Product.findByIdAndUpdate(req.query.productId, 
         {reviews, ratings, numOfReviews},
         {
